@@ -1,0 +1,9 @@
+Folders structure
+
+-bin - compile binaries are here
+-cmd - entry point of app
+    -api - everething server related(requests) is here
+    -migrate 
+-docs - documentation(Swager etc)
+-internal - hold all internal packages that are not going to be exported(work with DB etc)
+-scripts - different help scripts
