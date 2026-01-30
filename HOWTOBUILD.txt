@@ -1,0 +1,6 @@
+Tools that are used:
+    Run and test helpers:
+        - air  repo https://github.com/air-verse/air
+        - direnv (.envrc file)
+    Libraries:
+        - Golang Chi repo https://github.com/go-chi/chi
