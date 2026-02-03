@@ -10,4 +10,7 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	w.Write([]byte("I'm ok!\n"))
+
+	//Write some data to storage
+	//app.store.Posts.Create(r.Context())
 }

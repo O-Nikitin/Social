@@ -1,6 +1,23 @@
 Tools that are used:
     Run and test helpers:
-        - air  repo https://github.com/air-verse/air
+        - air.  repo https://github.com/air-verse/air
         - direnv (.envrc file)
+        - Golang migrate. repo https://github.com/golang-migrate/migrate
+        - Docker compose
     Libraries:
         - Golang Chi repo https://github.com/go-chi/chi
+        - PQ. Postgres lib
+        
+        
+How to run:
+	regular:
+		go1.25 run cmd/api/*.go
+	with air:
+		air
+	start Postgres DB in container for app:
+		 docker-compose up --build
+		 
+DB operaions(Makefile commands)
+	make migration fileName
+	migrate-up
+	migrate-down
