@@ -9,8 +9,12 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	w.Write([]byte("I'm ok!\n"))
-
-	//Write some data to storage
-	//app.store.Posts.Create(r.Context())
+	data := map[string]string{
+		"status":  "ok",
+		"env":     app.config.env,
+		"version": version,
+	}
+	if ok := writeJSON(w, http.StatusOK, data); ok == nil {
+		app.internalServerError(w, r, ok)
+	}
 }
