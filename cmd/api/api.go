@@ -56,7 +56,14 @@ func (app *application) mount() http.Handler {
 			r.Post("/", app.createPostHandler)
 
 			r.Route("/{postID}", func(r chi.Router) {
-				r.Get("/", app.getPostHandler)
+				// Routes that need the post loaded
+				r.With(app.postsContextMiddleware).Group(func(r chi.Router) {
+					r.Get("/", app.getPostHandler)
+					r.Patch("/", app.updatePostHandler)
+				})
+
+				// Routes that only need postID
+				r.Delete("/", app.deletePostHandler)
 			})
 		})
 	})

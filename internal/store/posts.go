@@ -28,7 +28,7 @@ func (p *PostStore) Create(
 	if p.db == nil {
 		return errors.New("nil db in PostStore")
 	}
-	query := `
+	const query = `
 	   INSERT INTO posts (content, title, user_id, tags)
 	   VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at 
 	   `
@@ -57,7 +57,7 @@ func (p *PostStore) GetByID(ctx context.Context, postID int64) (*Post, error) {
 		return nil, errors.New("nil db in PostStore")
 	}
 
-	query := `
+	const query = `
         SELECT
             id,
             content,
@@ -89,4 +89,49 @@ func (p *PostStore) GetByID(ctx context.Context, postID int64) (*Post, error) {
 	}
 
 	return &post, nil
+}
+
+func (p *PostStore) DeleteByID(ctx context.Context, postID int64) error {
+	if p.db == nil {
+		return errors.New("nil db in PostStore")
+	}
+
+	const query = `
+       DELETE FROM posts
+       WHERE id = $1
+    `
+
+	res, err := p.db.ExecContext(ctx, query, postID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (p *PostStore) UpdateByID(ctx context.Context, post *Post) error {
+	if p.db == nil {
+		return errors.New("nil db in PostStore")
+	}
+
+	const query = `
+       UPDATE posts
+       SET title = $1, content = $2
+	   WHERE id = $3
+    `
+
+	_, err := p.db.ExecContext(
+		ctx, query, post.Title, post.Content, post.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
