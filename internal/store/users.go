@@ -13,11 +13,11 @@ type User struct {
 	CreatedAt string `json:"created_at"`
 }
 
-type UsersStore struct {
+type UserStore struct {
 	db *sql.DB
 }
 
-func (u *UsersStore) Create(ctx context.Context,
+func (u *UserStore) Create(ctx context.Context,
 	user *User) error {
 	query := `
 		   INSERT INTO users (username, password, email)
