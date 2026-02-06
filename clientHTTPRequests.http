@@ -10,7 +10,19 @@ POST http://localhost:3000/v1/posts/
 Content-Type: application/json
 
 {
-  "title": "First post",
-  "content": "Hey guys, this is my first post",
+  "title": "New post",
+  "content": "Hey guys, this is my fourth post",
   "tags": ["go", "backend", "postgres"]
+}
+
+### DELETE /v1/posts/postID
+DELETE http://localhost:3000/v1/posts/8
+
+### PATCH update post
+PATCH http://localhost:3000/v1/posts/6
+Content-Type: application/json
+
+{
+  "title": "New post title",
+  "content": "Hey guys!. This is my updated content"
 }
