@@ -21,7 +21,7 @@ func (u *UserStore) Create(ctx context.Context,
 	user *User) error {
 	const query = `
 		   INSERT INTO users (username, password, email)
-		   VALUES ($1, $2, $3) RETURNING  created_at 
+		   VALUES ($1, $2, $3) RETURNING id, created_at 
 		   `
 
 	err := u.db.QueryRowContext(

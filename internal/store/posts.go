@@ -16,6 +16,7 @@ type Post struct {
 	Tags      []string  `json:"tags"`
 	CreatedAt string    `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
+	Version   int       `json:"version"`
 	Comments  []Comment `json:"comments"`
 }
 
@@ -65,7 +66,8 @@ func (p *PostStore) GetByID(ctx context.Context, postID int64) (*Post, error) {
             user_id,
             tags,
             created_at,
-            updated_at
+            updated_at,
+			version
         FROM posts
         WHERE id = $1;
 		`
@@ -78,6 +80,7 @@ func (p *PostStore) GetByID(ctx context.Context, postID int64) (*Post, error) {
 		pq.Array(&post.Tags),
 		&post.CreatedAt,
 		&post.UpdatedAt,
+		&post.Version,
 	)
 	if err != nil {
 		switch {
@@ -121,17 +124,31 @@ func (p *PostStore) UpdateByID(ctx context.Context, post *Post) error {
 	if p.db == nil {
 		return errors.New("nil db in PostStore")
 	}
-
+	//Here we have "version" field. It helps with concurent updates.
+	//For example two req readed post with same id 10 and version 1. First will write because version = $4(1)
+	//Then first chenge version to 2. So when second try to execute SQL it just not find the row with id 10 and version 1
+	//because version was updated to 2 by first req. Error "sql.ErrNoRows" will be returned from DB
 	const query = `
        UPDATE posts
-       SET title = $1, content = $2
-	   WHERE id = $3
+       SET title = $1, content = $2, version = version + 1
+	   WHERE id = $3 AND version = $4
+	   RETURNING version
     `
 
-	_, err := p.db.ExecContext(
-		ctx, query, post.Title, post.Content, post.ID)
+	err := p.db.QueryRowContext(
+		ctx, query,
+		post.Title,
+		post.Content,
+		post.ID,
+		post.Version,
+	).Scan(&post.Version)
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrNotFound
+		default:
+			return err
+		}
 	}
 	return nil
 }

@@ -18,6 +18,30 @@ type CommentStore struct {
 	db *sql.DB
 }
 
+func (c *CommentStore) Create(ctx context.Context, cm *Comment) error {
+	query := `
+	INSERT INTO comments (post_id, user_id, content)
+	VALUES ($1, $2, $3)
+	RETURNING id, created_at
+	`
+
+	err := c.db.QueryRowContext(
+		ctx,
+		query,
+		cm.PostID,
+		cm.UserID,
+		cm.Content,
+	).Scan(
+		&cm.ID,
+		&cm.CreatedAt,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *CommentStore) GetByPostID(ctx context.Context, postID int64) ([]Comment, error) {
 	if c.db == nil {
 		return nil, errors.New("nil db in CommentsStore")
