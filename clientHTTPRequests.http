@@ -2,8 +2,9 @@
 ### GET /v1/health
 GET http://localhost:3000/v1/health
 
+### ======================= POST =======================
 ### GET /v1/posts/postID
-GET http://localhost:3000/v1/posts/6
+GET http://localhost:3000/v1/posts/144
 
 ### POST create post
 POST http://localhost:3000/v1/posts/
@@ -25,4 +26,14 @@ Content-Type: application/json
 {
   "title": "New post title",
   "content": "Hey guys!. This is my updated content!"
+}
+
+### ======================= COMMENTS =======================
+### POST create post
+POST http://localhost:3000/v1/posts/144/comments
+Content-Type: application/json
+
+{
+  "userID": 50,
+  "content": "Hey guys, this is my important comment"
 }

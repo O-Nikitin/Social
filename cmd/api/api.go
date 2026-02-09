@@ -62,6 +62,11 @@ func (app *application) mount() http.Handler {
 					r.Patch("/", app.updatePostHandler)
 				})
 
+				// Comments for this post
+				r.Route("/comments", func(r chi.Router) {
+					r.Post("/", app.createCommentHandler)
+				})
+
 				// Routes that only need postID
 				r.Delete("/", app.deletePostHandler)
 			})
