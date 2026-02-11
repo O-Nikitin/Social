@@ -35,6 +35,19 @@ func (app *application) badRequestResponse(
 		err.Error())
 }
 
+func (app *application) conflictResponse(
+	w http.ResponseWriter, r *http.Request, err error) {
+
+	_, file, line, _ := runtime.Caller(1)
+	log.Printf("[%s:%d] conflict error: %s path: %s err: %s",
+		filepath.Base(file), line, r.Method, r.URL.Path, err)
+
+	writeJSONError(
+		w,
+		http.StatusConflict,
+		err.Error())
+}
+
 func (app *application) notFoundResponse(
 	w http.ResponseWriter, r *http.Request, err error) {
 
