@@ -19,6 +19,9 @@ type CommentStore struct {
 }
 
 func (c *CommentStore) Create(ctx context.Context, cm *Comment) error {
+	if c.db == nil {
+		return errors.New("nil db in CommentStore")
+	}
 	query := `
 	INSERT INTO comments (post_id, user_id, content)
 	VALUES ($1, $2, $3)

@@ -2,6 +2,28 @@
 ### GET /v1/health
 GET http://localhost:3000/v1/health
 
+### ======================= USERS =======================
+### GET /v1/users/userID
+GET http://localhost:3000/v1/users/700
+
+### Add follower
+### PUT /v1/users/userID/follow 
+PUT http://localhost:3000/v1/users/11/follow
+Content-Type: application/json
+
+{
+  "current_user_id": 7
+}
+
+### Remove follower
+### PUT /v1/users/userID/unfollow
+PUT http://localhost:3000/v1/users/20/unfollow
+Content-Type: application/json
+
+{
+  "current_user_id": 7
+}
+
 ### ======================= POST =======================
 ### GET /v1/posts/postID
 GET http://localhost:3000/v1/posts/144

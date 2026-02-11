@@ -18,7 +18,7 @@ func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Requ
 
 	postID, err := strconv.ParseInt(paramID, 10, 64)
 	if err != nil {
-		app.internalServerError(w, r, err)
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
