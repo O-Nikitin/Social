@@ -1,3 +1,5 @@
 - check health
 - get post by ID
 - make new post
+- add a comment to the post
+- follow/unfollow
