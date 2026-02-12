@@ -8,7 +8,7 @@ GET http://localhost:3000/v1/users/700
 
 ### Add follower
 ### PUT /v1/users/userID/follow 
-PUT http://localhost:3000/v1/users/11/follow
+PUT http://localhost:3000/v1/users/21/follow
 Content-Type: application/json
 
 {
@@ -59,3 +59,7 @@ Content-Type: application/json
   "userID": 50,
   "content": "Hey guys, this is my important comment"
 }
+
+### ======================= Feed =======================
+### GET /v1/users/feed 
+GET http://localhost:3000/v1/users/feed?limit=5
