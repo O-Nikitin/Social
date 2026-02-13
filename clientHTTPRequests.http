@@ -62,4 +62,6 @@ Content-Type: application/json
 
 ### ======================= Feed =======================
 ### GET /v1/users/feed 
-GET http://localhost:3000/v1/users/feed?limit=5
+### options that can be used:
+### limit=n, offset=n, search=key, tags=key1,key2 ,since,until=
+GET http://localhost:3000/v1/users/feed?search=home&tags=Productivity
