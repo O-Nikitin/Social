@@ -5,6 +5,7 @@ import (
 	"github.com/O-Nikitin/Social/internal/env"
 	"github.com/O-Nikitin/Social/internal/store"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const version = "0.0.1"
@@ -42,8 +43,11 @@ func main() {
 		apiURL: env.GetString("EXTERNAL_URL", "localhost:3000")}
 
 	//Logger
-	logger := zap.Must(zap.NewProduction()).Sugar()
-	defer logger.Sync() // flushes buffer, if any
+	logCfg := zap.NewProductionConfig()
+	// Customize time format
+	logCfg.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006/01/02 15:04:05.000000")
+	logger := zap.Must(logCfg.Build()).Sugar()
+	defer logger.Sync()
 
 	//DB
 	db, err := db.New(
