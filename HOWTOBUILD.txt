@@ -9,6 +9,7 @@ Tools that are used:
         - PQ. Postgres lib
         - Request struct validator. repo https://github.com/go-playground/validator
         - swagger. repo https://github.com/swaggo
+        - zap. Tool for logging. repo https://pkg.go.dev/go.uber.org/zap
         
         
 How to run:

@@ -153,7 +153,6 @@ func (app *application) userContextMiddleware(next http.Handler) http.Handler {
 			}
 			return
 		}
-		log.Println(user)
 		ctx := context.WithValue(r.Context(), userCtx, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
