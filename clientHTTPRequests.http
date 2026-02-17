@@ -4,11 +4,11 @@ GET http://localhost:3000/v1/health
 
 ### ======================= USERS =======================
 ### GET /v1/users/userID
-GET http://localhost:3000/v1/users/700
+GET http://localhost:3000/v1/users/7
 
 ### Add follower
 ### PUT /v1/users/userID/follow 
-PUT http://localhost:3000/v1/users/21/follow
+PUT http://localhost:3000/v1/users/25/follow
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
 }
 
 ### DELETE /v1/posts/postID
-DELETE http://localhost:3000/v1/posts/8
+DELETE http://localhost:3000/v1/posts/209
 
 ### PATCH update post
 PATCH http://localhost:3000/v1/posts/6
@@ -51,7 +51,7 @@ Content-Type: application/json
 }
 
 ### ======================= COMMENTS =======================
-### POST create post
+### POST create comment
 POST http://localhost:3000/v1/posts/144/comments
 Content-Type: application/json
 
@@ -64,4 +64,5 @@ Content-Type: application/json
 ### GET /v1/users/feed 
 ### options that can be used:
 ### limit=n, offset=n, search=key, tags=key1,key2 ,since,until=
-GET http://localhost:3000/v1/users/feed?search=home&tags=Productivity
+### NOTE - tags search inside one post
+GET http://localhost:3000/v1/users/feed?search=home&tags=Yoga,Mental Health

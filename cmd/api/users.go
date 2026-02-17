@@ -20,6 +20,20 @@ type FollowUser struct {
 	CurrentUserID int64 `json:"current_user_id"`
 }
 
+// GetUser godoc
+//
+//	@Summary		Get user info
+//	@Description	Get user info by ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			userID	path		int	true	"userID"
+//	@Success		200		{object}	main.envelopeSuccess{data=store.User}
+//	@Failure		400		{object}	main.envelopeErr
+//	@Failure		404		{object}	main.envelopeErr
+//	@Failure		500		{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/users/{userID} [get]
 func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromCtx(r)
 
@@ -29,6 +43,21 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// FollowUser godoc
+//
+//	@Summary		Follows a user
+//	@Description	Follows a user by ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"userID"
+//	@Success		204	"User followed"
+//	@Failure		400	{object}	main.envelopeErr	"User payload missing"
+//	@Failure		409	{object}	main.envelopeErr	"User already followed"
+//	@Failure		404	{object}	main.envelopeErr
+//	@Failure		500	{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/users/{id}/follow [put]
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	followerUser := getUserFromCtx(r)
 	//We have ID of user that we want to follow.
@@ -62,6 +91,20 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// UnfollowUser godoc
+//
+//	@Summary		Unfollows a user
+//	@Description	Unfollows a user by ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			userID	path	int	true	"userID"
+//	@Success		204		"User unfollowed"
+//	@Failure		400		{object}	main.envelopeErr	"User payload missing"
+//	@Failure		404		{object}	main.envelopeErr
+//	@Failure		500		{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/users/{userID}/unfollow [put]
 func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	followerUser := getUserFromCtx(r)
 

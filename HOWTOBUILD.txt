@@ -8,6 +8,7 @@ Tools that are used:
         - Golang Chi repo https://github.com/go-chi/chi
         - PQ. Postgres lib
         - Request struct validator. repo https://github.com/go-playground/validator
+        - swagger. repo https://github.com/swaggo
         
         
 How to run:
@@ -16,7 +17,9 @@ How to run:
 	with air:
 		air
 	start Postgres DB in container for app:
-		 docker-compose up --build
+		docker-compose up --build
+    swagger doc location:
+        http://localhost:3000/v1/swagger/index.html
 		 
 DB operaions(Makefile commands)
 	make migration fileName
