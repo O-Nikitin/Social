@@ -27,6 +27,19 @@ type UpdatePostPayload struct {
 	Content *string `json:"content" validate:"omitempty,max=1000"`
 }
 
+// CreatePost godoc
+//
+//	@Summary		Create post
+//	@Description	Create new post
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		main.CreatePostPayload	true	"Post data"
+//	@Success		201		{object}	main.envelopeSuccess.{data=store.Post}
+//	@Failure		400		{object}	main.envelopeErr	"User payload missing"
+//	@Failure		500		{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/posts [post]
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	var post CreatePostPayload
 	if err := readJSON(w, r, &post); err != nil {
@@ -41,7 +54,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 
 	DBpost := &store.Post{
 		//TODO change after Auth
-		UserID:  int64(1),
+		UserID:  int64(88),
 		Title:   post.Title,
 		Tags:    post.Tags,
 		Content: post.Content,
@@ -58,6 +71,20 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// GetPost godoc
+//
+//	@Summary		Get user post
+//	@Description	Get Post by ID
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			postID	path		int	true	"postID"
+//	@Success		200		{object}	main.envelopeSuccess{data=store.Post}
+//	@Failure		400		{object}	main.envelopeErr	"User payload missing"
+//	@Failure		404		{object}	main.envelopeErr
+//	@Failure		500		{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/posts/{postID} [get]
 func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromCtx(r)
 
@@ -74,6 +101,17 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeletePost godoc
+//
+//	@Summary		Delete post
+//	@Description	Delete existing post
+//	@Tags			posts
+//	@Param			postID	path	int	true	"postID"
+//	@Success		204		"Post deleted successfully"
+//	@Failure		404		{object}	main.envelopeErr
+//	@Failure		500		{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/posts/{postID} [delete]
 func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	paramID := chi.URLParam(r, "postID")
 
@@ -97,6 +135,20 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// UpdatePost godoc
+//
+//	@Summary		Update post
+//	@Description	Update existing post
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		main.UpdatePostPayload	true	"post data"
+//	@Success		200		{object}	main.envelopeSuccess{data=store.Post}
+//	@Failure		400		{object}	main.envelopeErr	"User payload missing"
+//	@Failure		404		{object}	main.envelopeErr
+//	@Failure		500		{object}	main.envelopeErr
+//	@Security		ApiKeyAuth
+//	@Router			/posts/{postID} [patch]
 func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromCtx(r)
 
