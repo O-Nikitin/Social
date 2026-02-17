@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
-
 	"github.com/O-Nikitin/Social/internal/db"
 	"github.com/O-Nikitin/Social/internal/env"
 	"github.com/O-Nikitin/Social/internal/store"
+	"go.uber.org/zap"
 )
 
 const version = "0.0.1"
@@ -29,8 +28,6 @@ const version = "0.0.1"
 //@description
 
 func main() {
-	//flag is used to print file name and line in log
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	cfg := config{
 		addr: env.GetString("ADDR", ":8080"),
 		db: dbConfig{
@@ -44,15 +41,20 @@ func main() {
 		env:    env.GetString("ENV", "development"),
 		apiURL: env.GetString("EXTERNAL_URL", "localhost:3000")}
 
+	//Logger
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync() // flushes buffer, if any
+
+	//DB
 	db, err := db.New(
 		cfg.db.addr,
 		cfg.db.maxOpenConns,
 		cfg.db.maxIdleConns,
 		cfg.db.maxidleTime)
 	if err != nil {
-		log.Panic(err.Error())
+		logger.Fatal(err.Error())
 	} else {
-		log.Println("DB connected!")
+		logger.Info("DB connected!")
 	}
 	defer db.Close()
 	store := store.NewStorage(db)
@@ -60,8 +62,9 @@ func main() {
 	app := application{
 		config: cfg,
 		store:  store,
+		logger: logger,
 	}
 
 	mux := app.mount()
-	log.Fatal(app.run(mux))
+	logger.Fatal(app.run(mux))
 }

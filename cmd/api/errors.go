@@ -1,21 +1,17 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"path/filepath"
-	"runtime"
 )
 
 func (app *application) internalServerError(
 	w http.ResponseWriter, r *http.Request, err error) {
 
-	_, file, line, _ := runtime.Caller(1)
-	log.Printf("[%s:%d] internal server error: %s path: %s err: %s",
-		filepath.Base(file), line, r.Method, r.URL.Path, err)
-	// log.Printf(
-	// 	"internal server error: %s path: %s err: %s",
-	// 	r.Method, r.URL.Path, err.Error())
+	app.logger.Errorw(
+		"internal server error",
+		"method", r.Method,
+		"path", r.URL.Path,
+		"err", err.Error())
 	writeJSONError(
 		w,
 		http.StatusInternalServerError,
@@ -25,9 +21,11 @@ func (app *application) internalServerError(
 func (app *application) badRequestResponse(
 	w http.ResponseWriter, r *http.Request, err error) {
 
-	_, file, line, _ := runtime.Caller(1)
-	log.Printf("[%s:%d] bad request error: %s path: %s err: %s",
-		filepath.Base(file), line, r.Method, r.URL.Path, err)
+	app.logger.Warnw(
+		"bad request error",
+		"method", r.Method,
+		"path", r.URL.Path,
+		"err", err.Error())
 
 	writeJSONError(
 		w,
@@ -38,9 +36,11 @@ func (app *application) badRequestResponse(
 func (app *application) conflictResponse(
 	w http.ResponseWriter, r *http.Request, err error) {
 
-	_, file, line, _ := runtime.Caller(1)
-	log.Printf("[%s:%d] conflict error: %s path: %s err: %s",
-		filepath.Base(file), line, r.Method, r.URL.Path, err)
+	app.logger.Errorw(
+		"conflict error",
+		"method", r.Method,
+		"path", r.URL.Path,
+		"err", err.Error())
 
 	writeJSONError(
 		w,
@@ -51,9 +51,11 @@ func (app *application) conflictResponse(
 func (app *application) notFoundResponse(
 	w http.ResponseWriter, r *http.Request, err error) {
 
-	_, file, line, _ := runtime.Caller(1)
-	log.Printf("[%s:%d] not found error: %s path: %s err: %s",
-		filepath.Base(file), line, r.Method, r.URL.Path, err)
+	app.logger.Warnw(
+		"not found error",
+		"method", r.Method,
+		"path", r.URL.Path,
+		"err", err.Error())
 
 	writeJSONError(
 		w,
