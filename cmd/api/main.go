@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/O-Nikitin/Social/internal/db"
 	"github.com/O-Nikitin/Social/internal/env"
 	"github.com/O-Nikitin/Social/internal/store"
@@ -40,7 +42,8 @@ func main() {
 			maxidleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
 		env:    env.GetString("ENV", "development"),
-		apiURL: env.GetString("EXTERNAL_URL", "localhost:3000")}
+		apiURL: env.GetString("EXTERNAL_URL", "localhost:3000"),
+		mail:   mailConfig{exp: time.Hour * 24 * 3}}
 
 	//Logger
 	logCfg := zap.NewProductionConfig()

@@ -1,5 +1,8 @@
 - check health
 - get post by ID
 - make new post
+- update post
 - add a comment to the post
 - follow/unfollow
+- get user feed according to filters
+- user registration with invitation

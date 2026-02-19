@@ -10,6 +10,7 @@ Tools that are used:
         - Request struct validator. repo https://github.com/go-playground/validator
         - swagger. repo https://github.com/swaggo
         - zap. Tool for logging. repo https://pkg.go.dev/go.uber.org/zap
+        - uuid. Used for token generation. repo "github.com/google/uuid"
         
         
 How to run:
