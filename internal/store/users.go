@@ -6,8 +6,10 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -73,14 +75,18 @@ func (u *UserStore) Create(ctx context.Context, tx *sql.Tx,
 		&user.CreatedAt,
 	)
 	if err != nil {
-		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return ErrDuplicateEmail
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
-			return ErrDuplicateUsername
-		default:
-			return err
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23505" { // 23505 is Unique Violation
+				switch pqErr.Constraint {
+				case "users_email_key":
+					return ErrDuplicateEmail
+				case "users_username_key":
+					return ErrDuplicateUsername
+				}
+			}
 		}
+		return err
 	}
 
 	return nil
@@ -162,6 +168,44 @@ func (u *UserStore) Activate(
 	})
 }
 
+func (u *UserStore) Delete(ctx context.Context, userID int64) error {
+	return withTx(u.db, ctx, func(tx *sql.Tx) error {
+		if err := u.delete(ctx, tx, userID); err != nil {
+			fmt.Println("ERROR! ", err.Error())
+			return err
+		}
+
+		if err := u.deleteUserInvitations(ctx, tx, userID); err != nil {
+			fmt.Println("ERROR!! ", err.Error())
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (u *UserStore) delete(ctx context.Context, tx *sql.Tx, id int64) error {
+	query := `DELETE FROM users WHERE id = $1`
+
+	_, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *UserStore) deleteUserInvitations(ctx context.Context, tx *sql.Tx, userID int64) error {
+	query := `DELETE FROM user_invitations WHERE user_id = $1`
+
+	_, err := tx.ExecContext(ctx, query, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *UserStore) getUserFromUnvitation(
 	ctx context.Context, tx *sql.Tx,
 	token string) (User, error) {
@@ -214,17 +258,6 @@ func (u *UserStore) update(
 		user.Email,
 		user.IsActive,
 		user.ID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *UserStore) deleteUserInvitations(ctx context.Context, tx *sql.Tx, userID int64) error {
-	query := `DELETE FROM user_invitations WHERE user_id = $1`
-
-	_, err := tx.ExecContext(ctx, query, userID)
 	if err != nil {
 		return err
 	}

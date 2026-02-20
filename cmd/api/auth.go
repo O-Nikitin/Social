@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 
+	"github.com/O-Nikitin/Social/internal/mailer"
 	"github.com/O-Nikitin/Social/internal/store"
 	"github.com/google/uuid"
 )
@@ -75,6 +77,38 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	//mail
+	activationURL := fmt.Sprintf(
+		"%s/confirm/%s",
+		app.config.frontendURL,
+		plainToken)
+	isProdEnv := app.config.env == "production"
+	vars := struct {
+		Username      string
+		ActivationURL string
+	}{
+		Username:      user.Username,
+		ActivationURL: activationURL,
+	}
+	code, err := app.mailer.Send(
+		mailer.UserWelcomeTemplate,
+		user.Username,
+		user.Email,
+		vars,
+		!isProdEnv)
+	if err != nil {
+		app.logger.Errorw("error sending welcome email ", err.Error())
+		//rollback all changes in DB(SAGA pattern)
+
+		if err := app.store.Users.Delete(r.Context(), user.ID); err != nil {
+			app.logger.Errorw("failed to rollback user from DB ", err.Error())
+			app.internalServerError(w, r, err)
+			return
+		}
+		app.internalServerError(w, r, err)
+		return
+	}
+	app.logger.Infow("Email sent", "status code", code)
+
 	//TODO for testing. Later user should get token on email
 	userWithToken := UserWithToken{
 		User:  user,
@@ -82,6 +116,5 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
 		app.internalServerError(w, r, err)
-		return
 	}
 }
