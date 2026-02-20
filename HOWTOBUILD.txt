@@ -11,6 +11,8 @@ Tools that are used:
         - swagger. repo https://github.com/swaggo
         - zap. Tool for logging. repo https://pkg.go.dev/go.uber.org/zap
         - uuid. Used for token generation. repo "github.com/google/uuid"
+        - sendgrid for emails. repo github.com/sendgrid/sendgrid-go // Not used
+        - mailTrap for emails
         
         
 How to run:

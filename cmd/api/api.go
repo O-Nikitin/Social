@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/O-Nikitin/Social/docs" //Requaired to generate swagger docs
+	"github.com/O-Nikitin/Social/internal/mailer"
 	"github.com/O-Nikitin/Social/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -19,15 +20,27 @@ const (
 )
 
 type config struct {
-	addr   string
-	db     dbConfig
-	env    string
-	apiURL string
-	mail   mailConfig
+	addr        string
+	db          dbConfig
+	env         string
+	apiURL      string
+	mail        mailConfig
+	frontendURL string
 }
 
 type mailConfig struct {
-	exp time.Duration
+	sendGrid  sendGridConfig
+	mailTrap  mailTrapConfig
+	fromEmail string
+	exp       time.Duration
+}
+
+type sendGridConfig struct {
+	apiKey string
+}
+
+type mailTrapConfig struct {
+	apiKey string
 }
 
 type dbConfig struct {
@@ -41,6 +54,7 @@ type application struct {
 	config config
 	store  store.Storage
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 func (app *application) mount() http.Handler {
@@ -57,7 +71,7 @@ func (app *application) mount() http.Handler {
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
-	r.Use(middleware.Timeout(1 * time.Second))
+	r.Use(middleware.Timeout(20 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)

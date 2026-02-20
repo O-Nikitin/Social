@@ -5,6 +5,7 @@ import (
 
 	"github.com/O-Nikitin/Social/internal/db"
 	"github.com/O-Nikitin/Social/internal/env"
+	"github.com/O-Nikitin/Social/internal/mailer"
 	"github.com/O-Nikitin/Social/internal/store"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -43,7 +44,14 @@ func main() {
 		},
 		env:    env.GetString("ENV", "development"),
 		apiURL: env.GetString("EXTERNAL_URL", "localhost:3000"),
-		mail:   mailConfig{exp: time.Hour * 24 * 3}}
+		mail: mailConfig{
+			exp:       time.Hour * 24 * 3,
+			fromEmail: env.GetString("FROM_EMAIL", "hello@demomailtrap.co"),
+			mailTrap: mailTrapConfig{
+				apiKey: env.GetString("MAILTRAP_API_KEY", "")},
+			sendGrid: sendGridConfig{
+				apiKey: env.GetString("SENDGRID_API_KEY", "defaultKey")}},
+		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:4000")}
 
 	//Logger
 	logCfg := zap.NewProductionConfig()
@@ -66,10 +74,22 @@ func main() {
 	defer db.Close()
 	store := store.NewStorage(db)
 
+	// mailer := mailer.NewSendGridMailer(
+	// 	cfg.mail.sendGrid.apiKey,
+	// 	cfg.mail.fromEmail)
+
+	mailer, err := mailer.NewMailTrapClient(
+		cfg.mail.mailTrap.apiKey,
+		cfg.mail.fromEmail)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	app := application{
 		config: cfg,
 		store:  store,
 		logger: logger,
+		mailer: mailer,
 	}
 
 	mux := app.mount()

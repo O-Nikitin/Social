@@ -6,3 +6,4 @@
 - follow/unfollow
 - get user feed according to filters
 - user registration with invitation
+- sending invitation email
