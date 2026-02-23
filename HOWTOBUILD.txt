@@ -13,6 +13,7 @@ Tools that are used:
         - uuid. Used for token generation. repo "github.com/google/uuid"
         - sendgrid for emails. repo github.com/sendgrid/sendgrid-go // Not used
         - mailTrap for emails
+        - Vite for front end page. https://vite.dev
         
         
 How to run:
@@ -24,6 +25,8 @@ How to run:
 		docker-compose up --build
     swagger doc location:
         http://localhost:3000/v1/swagger/index.html
+    front end:
+        npm run dev
 		 
 DB operaions(Makefile commands)
 	make migration fileName

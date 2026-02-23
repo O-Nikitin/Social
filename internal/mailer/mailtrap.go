@@ -30,7 +30,8 @@ func NewMailTrapClient(apiKey, email string) (*mailTrapClient, error) {
 func (m *mailTrapClient) Send(templateFile, username, email string,
 	data any, isSandbox bool) (int, error) {
 	if isSandbox {
-		return -1, fmt.Errorf("isSandbox enabled. Do not send email")
+		log.Println("isSandbox is enabled. Do not send email")
+		return 200, nil
 	}
 	// Template parsing and building
 	tmpl, err := template.ParseFS(FS, "template/"+templateFile)

@@ -24,6 +24,11 @@ Content-Type: application/json
   "current_user_id": 7
 }
 
+### Activate user with token
+### PUT /v1/users/activate/{token}
+PUT http://localhost:3000/v1/users/activate/c8f0fbbf-0c21-4c1d-af09-a9771ae8eec3
+
+
 ### ======================= POST =======================
 ### GET /v1/posts/postID
 GET http://localhost:3000/v1/posts/144
@@ -66,3 +71,15 @@ Content-Type: application/json
 ### limit=n, offset=n, search=key, tags=key1,key2 ,since,until=
 ### NOTE - tags search inside one post
 GET http://localhost:3000/v1/users/feed?search=home&tags=Yoga,Mental Health
+
+
+### ======================= Authentication =======================
+### POST create user
+POST http://localhost:3000/v1/authentication/user
+Content-Type: application/json
+
+{
+  "email": "som21@mail.com",
+  "password": "sdgsdgs",
+  "username": "front"
+}
