@@ -85,10 +85,7 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 		}
 
 	}
-	if err := app.jsonResponse(w, http.StatusNoContent, followerUser); err != nil {
-		app.internalServerError(w, r, err)
-		return
-	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // UnfollowUser godoc
@@ -128,10 +125,7 @@ func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := app.jsonResponse(w, http.StatusNoContent, followerUser); err != nil {
-		app.internalServerError(w, r, err)
-		return
-	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // ActivateUser godoc
@@ -159,9 +153,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := app.jsonResponse(w, http.StatusNoContent, ""); err != nil {
-		app.internalServerError(w, r, err)
-	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (app *application) userContextMiddleware(next http.Handler) http.Handler {
