@@ -51,7 +51,11 @@ func main() {
 				apiKey: env.GetString("MAILTRAP_API_KEY", "")},
 			sendGrid: sendGridConfig{
 				apiKey: env.GetString("SENDGRID_API_KEY", "defaultKey")}},
-		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:5173")}
+		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:5173"),
+		auth: authConfig{
+			basic: basicConfig{
+				user: env.GetString("AUTH_BASIC_USER", "admin"),
+				pass: env.GetString("AUTH_BASIC_PASS", "admin")}}}
 
 	//Logger
 	logCfg := zap.NewProductionConfig()
