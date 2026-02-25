@@ -13,6 +13,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	//We can't just change roles because they inserted into "roles" DB table
+	UserRole      = "user"
+	ModeratorRole = "moderator"
+	AdminRole     = "admin"
+)
+
 type User struct {
 	ID        int64    `json:"id"`
 	Username  string   `json:"username"`
@@ -20,6 +27,8 @@ type User struct {
 	Password  password `json:"-"`
 	CreatedAt string   `json:"created_at"`
 	IsActive  bool     `json:"is_active"`
+	RoleID    int64    `json:"role_id"`
+	Role      Role     `json:"role"`
 }
 
 type password struct {
@@ -64,16 +73,21 @@ func (u *UserStore) Create(ctx context.Context, tx *sql.Tx,
 		return errors.New("nil db in UserStore")
 	}
 	const query = `
-		   INSERT INTO users (username, password, email)
-		   VALUES ($1, $2, $3) RETURNING id, created_at 
+		   INSERT INTO users (username, password, email, role_id)
+		   VALUES ($1, $2, $3, (SELECT if FROM roles WHERE name = $4)) RETURNING id, created_at 
 		   `
 
+	roleName := user.Role.Name
+	if len(roleName) == 0 {
+		roleName = UserRole
+	}
 	err := tx.QueryRowContext(
 		ctx,
 		query,
 		user.Username,
 		user.Password.hash,
 		user.Email,
+		roleName,
 	).Scan(
 		&user.ID,
 		&user.CreatedAt,
@@ -103,13 +117,15 @@ func (u *UserStore) GetByID(ctx context.Context, userID int64) (*User, error) {
 
 	const query = `
         SELECT
-			id,
+			users.id,
             email,
 			username,
 			password,
-			created_at
+			created_at,
+			roles.*
         FROM users
-        WHERE id = $1 AND is_active = true;
+		JOIN roles ON(users.role_id = roles.id)
+        WHERE users.id = $1 AND is_active = true;
 		`
 	var user User
 	err := u.db.QueryRowContext(ctx, query, userID).Scan(
@@ -118,6 +134,10 @@ func (u *UserStore) GetByID(ctx context.Context, userID int64) (*User, error) {
 		&user.Username,
 		&user.Password.hash,
 		&user.CreatedAt,
+		&user.Role.ID,
+		&user.Role.Name,
+		&user.Role.Level,
+		&user.Role.Description,
 	)
 	if err != nil {
 		switch {

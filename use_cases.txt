@@ -8,3 +8,4 @@
 - user registration with invitation
 - sending invitation email
 - login with email and password and receive JWT token which then added to Authorization header for each request
+- check post owner and current used role when user attampt to modify or delete post

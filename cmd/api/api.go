@@ -121,16 +121,14 @@ func (app *application) mount() http.Handler {
 				// Routes that need the post loaded
 				r.With(app.postsContextMiddleware).Group(func(r chi.Router) {
 					r.Get("/", app.getPostHandler)
-					r.Patch("/", app.updatePostHandler)
+					r.Patch("/", app.CheckPostOwnership(store.ModeratorRole, app.updatePostHandler))
+					r.Delete("/", app.CheckPostOwnership(store.AdminRole, app.deletePostHandler))
 				})
 
 				// Comments for this post
 				r.Route("/comments", func(r chi.Router) {
 					r.Post("/", app.createCommentHandler)
 				})
-
-				// Routes that only need postID
-				r.Delete("/", app.deletePostHandler)
 			})
 		})
 		r.Route("/users", func(r chi.Router) {
