@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -14,11 +13,6 @@ import (
 type userKey string
 
 const userCtx userKey = "user"
-
-// TODO temp
-type FollowUser struct {
-	CurrentUserID int64 `json:"current_user_id"`
-}
 
 // GetUser godoc
 //
@@ -50,30 +44,24 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Tags			users
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	int	true	"userID"
-//	@Success		204	"User followed"
-//	@Failure		400	{object}	main.envelopeErr	"User payload missing"
-//	@Failure		409	{object}	main.envelopeErr	"User already followed"
-//	@Failure		404	{object}	main.envelopeErr
-//	@Failure		500	{object}	main.envelopeErr
+//	@Param			userID	path	int	true	"userID"
+//	@Success		204		"User followed"
+//	@Failure		400		{object}	main.envelopeErr	"User payload missing"
+//	@Failure		409		{object}	main.envelopeErr	"User already followed"
+//	@Failure		404		{object}	main.envelopeErr
+//	@Failure		500		{object}	main.envelopeErr
 //	@Security		ApiKeyAuth
-//	@Router			/users/{id}/follow [put]
+//	@Router			/users/{userID}/follow [put]
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
-	followerUser := getUserFromCtx(r)
-	//We have ID of user that we want to follow.
-	//Byt we do not have current user ID which we will fetch
-	//when implement autentification
-	//TODO temp
-	var curUserID FollowUser
-	if err := readJSON(w, r, &curUserID); err != nil {
+	currentUser := getUserFromCtx(r)
+
+	followedUser, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
+	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-	if followerUser == nil {
-		log.Println("followerUser nil")
-	}
 
-	err := app.store.Followers.Follow(r.Context(), followerUser.ID, curUserID.CurrentUserID)
+	err = app.store.Followers.Follow(r.Context(), followedUser, currentUser.ID)
 	if err != nil {
 		switch err {
 		case store.ErrConflict:
@@ -103,18 +91,14 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 //	@Security		ApiKeyAuth
 //	@Router			/users/{userID}/unfollow [put]
 func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
-	followerUser := getUserFromCtx(r)
+	currentUser := getUserFromCtx(r)
 
-	//We have ID of user that we want to follow.
-	//Byt we do not have current user ID which we will fetch
-	//when implement autentification
-	//TODO temp
-	var curUserID FollowUser
-	if err := readJSON(w, r, &curUserID); err != nil {
+	followedUser, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
+	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-	err := app.store.Followers.Unfollow(r.Context(), followerUser.ID, curUserID.CurrentUserID)
+	err = app.store.Followers.Unfollow(r.Context(), followedUser, currentUser.ID)
 	if err != nil {
 		switch {
 		case errors.Is(err, store.ErrNotFound):

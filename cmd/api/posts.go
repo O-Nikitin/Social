@@ -51,10 +51,9 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
+	user := getUserFromCtx(r)
 	DBpost := &store.Post{
-		//TODO change after Auth
-		UserID:  int64(88),
+		UserID:  user.ID,
 		Title:   post.Title,
 		Tags:    post.Tags,
 		Content: post.Content,
@@ -142,6 +141,7 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 //	@Tags			posts
 //	@Accept			json
 //	@Produce		json
+//	@Param			postID	path		int						true	"Post ID"
 //	@Param			body	body		main.UpdatePostPayload	true	"post data"
 //	@Success		200		{object}	main.envelopeSuccess{data=store.Post}
 //	@Failure		400		{object}	main.envelopeErr	"User payload missing"

@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/O-Nikitin/Social/internal/auth"
 	"github.com/O-Nikitin/Social/internal/db"
 	"github.com/O-Nikitin/Social/internal/env"
 	"github.com/O-Nikitin/Social/internal/mailer"
@@ -55,7 +56,12 @@ func main() {
 		auth: authConfig{
 			basic: basicConfig{
 				user: env.GetString("AUTH_BASIC_USER", "admin"),
-				pass: env.GetString("AUTH_BASIC_PASS", "admin")}}}
+				pass: env.GetString("AUTH_BASIC_PASS", "admin")},
+			token: tokenConfig{
+				secret: env.GetString("AUTH_TOKEN_SECRET", "example"),
+				exp:    time.Hour * 24 * 3, // 3 days
+				iss:    "Social",
+			}}}
 
 	//Logger
 	logCfg := zap.NewProductionConfig()
@@ -89,11 +95,17 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	//auth
+	auth := auth.NewJWTAuthenticator(
+		cfg.auth.token.secret,
+		cfg.auth.token.iss,
+		cfg.auth.token.iss)
 	app := application{
-		config: cfg,
-		store:  store,
-		logger: logger,
-		mailer: mailer,
+		config:        cfg,
+		store:         store,
+		logger:        logger,
+		mailer:        mailer,
+		authenticator: auth,
 	}
 
 	mux := app.mount()

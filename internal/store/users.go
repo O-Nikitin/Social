@@ -50,6 +50,10 @@ func (p *password) Matches(text string) (bool, error) {
 	return true, nil
 }
 
+func (p *password) Compare(text string) error {
+	return bcrypt.CompareHashAndPassword(p.hash, []byte(text))
+}
+
 type UserStore struct {
 	db *sql.DB
 }
@@ -105,14 +109,14 @@ func (u *UserStore) GetByID(ctx context.Context, userID int64) (*User, error) {
 			password,
 			created_at
         FROM users
-        WHERE id = $1;
+        WHERE id = $1 AND is_active = true;
 		`
 	var user User
 	err := u.db.QueryRowContext(ctx, query, userID).Scan(
 		&user.ID,
 		&user.Email,
 		&user.Username,
-		&user.Password,
+		&user.Password.hash,
 		&user.CreatedAt,
 	)
 	if err != nil {
@@ -123,7 +127,45 @@ func (u *UserStore) GetByID(ctx context.Context, userID int64) (*User, error) {
 			return nil, err
 		}
 	}
+	//Because only active user will be returned from DB
+	user.IsActive = true
 
+	return &user, nil
+}
+
+func (u *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
+	if u.db == nil {
+		return nil, errors.New("nil db in UserStore")
+	}
+
+	const query = `
+        SELECT
+			id,
+            email,
+			username,
+			password,
+			created_at
+        FROM users
+        WHERE email = $1 AND is_active = true;
+		`
+	var user User
+	err := u.db.QueryRowContext(ctx, query, email).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Username,
+		&user.Password.hash,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrNotFound
+		default:
+			return nil, err
+		}
+	}
+	// Because only active user will be returned from DB
+	user.IsActive = true
 	return &user, nil
 }
 

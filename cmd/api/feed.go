@@ -44,9 +44,9 @@ func (app *application) getUserFeedHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	//TODO hardcoded userID
+	user := getUserFromCtx(r)
 	feed, err := app.store.Posts.GetUserFeed(
-		r.Context(), int64(7), fq)
+		r.Context(), user.ID, fq)
 
 	if err != nil {
 		app.internalServerError(w, r, err)

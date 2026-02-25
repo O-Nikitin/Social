@@ -7,3 +7,4 @@
 - get user feed according to filters
 - user registration with invitation
 - sending invitation email
+- login with email and password and receive JWT token which then added to Authorization header for each request
