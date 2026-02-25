@@ -9,7 +9,6 @@ import (
 )
 
 type CreateCommentPayload struct {
-	UserID  int64   `json:"userID" validate:"required,gte=1"`
 	Content *string `json:"content" validate:"required,max=1000"`
 }
 
@@ -20,6 +19,7 @@ type CreateCommentPayload struct {
 //	@Tags			comments
 //	@Accept			json
 //	@Produce		json
+//	@Param			postID	path		int							true	"Post ID"
 //	@Param			body	body		main.CreateCommentPayload	true	"Comment data"
 //	@Success		201		{object}	main.envelopeSuccess{data=store.Comment}
 //	@Failure		400		{object}	main.envelopeErr	"User payload missing"
@@ -28,7 +28,6 @@ type CreateCommentPayload struct {
 //	@Router			/posts/{postID}/comments [post]
 func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Request) {
 	paramID := chi.URLParam(r, "postID")
-	//TODO check req in swagger after auth added
 	postID, err := strconv.ParseInt(paramID, 10, 64)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
@@ -45,10 +44,10 @@ func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Requ
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
+	user := getUserFromCtx(r)
 	DBcomment := &store.Comment{
 		PostID:  postID,
-		UserID:  comment.UserID,
+		UserID:  user.ID,
 		Content: *comment.Content,
 	}
 

@@ -74,7 +74,7 @@ GET http://localhost:3000/v1/users/feed?search=home&tags=Yoga,Mental Health
 
 
 ### ======================= Authentication =======================
-### POST create user
+### POST authentication user
 POST http://localhost:3000/v1/authentication/user
 Content-Type: application/json
 
@@ -82,4 +82,13 @@ Content-Type: application/json
   "email": "som21@mail.com",
   "password": "sdgsdgs",
   "username": "front"
+}
+
+### POST create token
+POST http://localhost:3000/v1/authentication/token
+Content-Type: application/json
+
+{
+  "email": "string",
+  "password": "string"
 }
