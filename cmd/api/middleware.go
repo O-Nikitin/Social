@@ -45,12 +45,11 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := app.store.Users.GetByID(r.Context(), userId)
+		user, err := app.getUser(r.Context(), userId)
 		if err != nil {
 			app.unauthorizedErrorResponse(w, r, err)
 			return
 		}
-
 		ctx := context.WithValue(r.Context(), userCtx, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -134,4 +133,27 @@ func (app *application) checkRolePrecedence(ctx context.Context, user *store.Use
 	}
 
 	return user.Role.Level >= role.Level, nil
+}
+
+func (app *application) getUser(ctx context.Context, userID int64) (*store.User, error) {
+	if !app.config.redis.enabled {
+		return app.store.Users.GetByID(ctx, userID)
+	}
+
+	user, err := app.cacheStorage.Users.Get(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		user, err := app.store.Users.GetByID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		//Update user in cache so we can get it durring next req
+		if err := app.cacheStorage.Users.Set(ctx, user); err != nil {
+			app.logger.Warnf("User was not updated in cache")
+		}
+	}
+	return user, nil
 }
