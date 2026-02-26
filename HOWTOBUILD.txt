@@ -15,6 +15,7 @@ Tools that are used:
         - mailTrap for emails
         - Vite for front end page. https://vite.dev
         - JWT for token. repo github.com/golang-jwt/jwt/v5
+        - Redis. repo github.com/redis/go-redis/v9
         
         
 How to run:
@@ -28,6 +29,8 @@ How to run:
         http://localhost:3000/v1/swagger/index.html
     front end:
         npm run dev
+    Redis(can be runed with docker compose):
+        docker run -d --rm --name social-redis -p 6379:6379 redis:alpine redis-server --loglevel warning
 		 
 DB operaions(Makefile commands)
 	make migration fileName

@@ -9,6 +9,7 @@ import (
 	"github.com/O-Nikitin/Social/internal/auth"
 	"github.com/O-Nikitin/Social/internal/mailer"
 	"github.com/O-Nikitin/Social/internal/store"
+	"github.com/O-Nikitin/Social/internal/store/cache"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -29,6 +30,14 @@ type config struct {
 	mail        mailConfig
 	frontendURL string
 	auth        authConfig
+	redis       redisConfig
+}
+
+type redisConfig struct {
+	address string
+	pw      string
+	db      int
+	enabled bool
 }
 
 type authConfig struct {
@@ -72,6 +81,7 @@ type dbConfig struct {
 type application struct {
 	config        config
 	store         store.Storage
+	cacheStorage  cache.Storage
 	logger        *zap.SugaredLogger
 	mailer        mailer.Client
 	authenticator auth.Authenticator

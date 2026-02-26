@@ -8,6 +8,8 @@ import (
 	"github.com/O-Nikitin/Social/internal/env"
 	"github.com/O-Nikitin/Social/internal/mailer"
 	"github.com/O-Nikitin/Social/internal/store"
+	"github.com/O-Nikitin/Social/internal/store/cache"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -61,7 +63,12 @@ func main() {
 				secret: env.GetString("AUTH_TOKEN_SECRET", "example"),
 				exp:    time.Hour * 24 * 3, // 3 days
 				iss:    "Social",
-			}}}
+			}},
+		redis: redisConfig{
+			address: env.GetString("REDIS_ADDR", "localhost:6379"),
+			pw:      env.GetString("REDIS_PW", ""),
+			db:      env.GetInt("REDIS_DB", 0),
+			enabled: env.GetBool("REDIS_ENABLED", true)}}
 
 	//Logger
 	logCfg := zap.NewProductionConfig()
@@ -82,7 +89,17 @@ func main() {
 		logger.Info("DB connected!")
 	}
 	defer db.Close()
+
 	store := store.NewStorage(db)
+
+	//Redis cache
+	var redis *redis.Client
+	if cfg.redis.enabled {
+		redis = cache.NewRedisClient(
+			cfg.redis.address, cfg.redis.pw, cfg.redis.db)
+		logger.Info("Redis connected!")
+	}
+	cacheStorage := cache.NewStorage(redis)
 
 	// mailer := mailer.NewSendGridMailer(
 	// 	cfg.mail.sendGrid.apiKey,
@@ -103,6 +120,7 @@ func main() {
 	app := application{
 		config:        cfg,
 		store:         store,
+		cacheStorage:  cacheStorage,
 		logger:        logger,
 		mailer:        mailer,
 		authenticator: auth,
