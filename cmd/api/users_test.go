@@ -12,7 +12,7 @@ import (
 )
 
 func TestUsers_GetUser(t *testing.T) {
-	app, mocks := newTestApp(t)
+	app, mocks := newTestApp(t, config{})
 	mux := app.mount()
 	testToken := "abc123"
 	t.Run("Should_not_allow_unauthentificated_requests",

@@ -13,6 +13,7 @@ import (
 	"github.com/O-Nikitin/Social/docs" //Requaired to generate swagger docs
 	"github.com/O-Nikitin/Social/internal/auth"
 	"github.com/O-Nikitin/Social/internal/mailer"
+	"github.com/O-Nikitin/Social/internal/ratelimiter"
 	"github.com/O-Nikitin/Social/internal/store"
 	"github.com/O-Nikitin/Social/internal/store/cache"
 	"github.com/go-chi/chi/v5"
@@ -36,6 +37,7 @@ type config struct {
 	frontendURL string
 	auth        authConfig
 	redis       redisConfig
+	rateLimiter ratelimiter.Config
 }
 
 type redisConfig struct {
@@ -90,6 +92,7 @@ type application struct {
 	logger        *zap.SugaredLogger
 	mailer        mailer.Client
 	authenticator auth.Authenticator
+	rateLimiter   ratelimiter.Limiter
 }
 
 func (app *application) mount() http.Handler {
@@ -115,6 +118,8 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Logger)
 	//Recovers from panic and return internal server error
 	r.Use(middleware.Recoverer)
+	//Rate limiter
+	r.Use(app.RateLimiterMiddleware)
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
@@ -122,7 +127,8 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Timeout(20 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
-		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		//r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		r.Get("/health", app.healthCheckHandler)
 
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))
