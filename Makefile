@@ -30,3 +30,4 @@ gen-mocks:
 	@go generate internal/auth/*.go
 	@go generate internal/mailer/*.go
 	@go generate internal/store/cache/*.go
+	@go generate internal/ratelimiter/*.go

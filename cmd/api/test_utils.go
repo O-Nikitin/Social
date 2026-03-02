@@ -8,6 +8,7 @@ import (
 	mock_auth "github.com/O-Nikitin/Social/cmd/api/mock/auth"
 	mock_mailer "github.com/O-Nikitin/Social/cmd/api/mock/mailer"
 	mock_storage "github.com/O-Nikitin/Social/cmd/api/mock/store"
+	"github.com/O-Nikitin/Social/internal/ratelimiter"
 	"github.com/O-Nikitin/Social/internal/store"
 	"github.com/O-Nikitin/Social/internal/store/cache"
 	"github.com/golang/mock/gomock"
@@ -25,7 +26,7 @@ type AppMocks struct {
 	Auth      *mock_auth.MockAuthenticator
 }
 
-func newTestApp(t *testing.T) (*application, *AppMocks) {
+func newTestApp(t *testing.T, cfg config) (*application, *AppMocks) {
 	t.Helper()
 
 	//log := zap.NewNop().Sugar() disable logs
@@ -56,12 +57,20 @@ func newTestApp(t *testing.T) (*application, *AppMocks) {
 		Users: mockUserCache,
 	}
 
+	// Rate limiter
+	rateLimiter := ratelimiter.NewFixedWindowLimiter(
+		cfg.rateLimiter.RequestsPerTimeFrame,
+		cfg.rateLimiter.TimeFrame,
+	)
+
 	a := &application{
 		logger:        log,
 		store:         storage,
 		cacheStorage:  cache,
 		mailer:        mockMailer,
 		authenticator: mockAuth,
+		config:        cfg,
+		rateLimiter:   rateLimiter, //TODO real rate limiter should be replaced with mock
 	}
 	m := &AppMocks{
 		Posts:     mockPosts,

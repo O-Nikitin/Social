@@ -7,6 +7,7 @@ import (
 	"github.com/O-Nikitin/Social/internal/db"
 	"github.com/O-Nikitin/Social/internal/env"
 	"github.com/O-Nikitin/Social/internal/mailer"
+	"github.com/O-Nikitin/Social/internal/ratelimiter"
 	"github.com/O-Nikitin/Social/internal/store"
 	"github.com/O-Nikitin/Social/internal/store/cache"
 	"github.com/redis/go-redis/v9"
@@ -68,7 +69,12 @@ func main() {
 			address: env.GetString("REDIS_ADDR", "localhost:6379"),
 			pw:      env.GetString("REDIS_PW", ""),
 			db:      env.GetInt("REDIS_DB", 0),
-			enabled: env.GetBool("REDIS_ENABLED", true)}}
+			enabled: env.GetBool("REDIS_ENABLED", true)},
+		rateLimiter: ratelimiter.Config{
+			RequestsPerTimeFrame: env.GetInt("RATE_LIMITER_REQUESTS_COUNT", 20),
+			TimeFrame:            time.Second * 5,
+			Enabled:              env.GetBool("RATE_LIMITER_ENABLED", true),
+		}}
 
 	//Logger
 	logCfg := zap.NewProductionConfig()
@@ -117,6 +123,13 @@ func main() {
 		cfg.auth.token.secret,
 		cfg.auth.token.iss,
 		cfg.auth.token.iss)
+
+	//Rate limiter
+	rateLimiter := ratelimiter.NewFixedWindowLimiter(
+		cfg.rateLimiter.RequestsPerTimeFrame,
+		cfg.rateLimiter.TimeFrame,
+	)
+
 	app := application{
 		config:        cfg,
 		store:         store,
@@ -124,6 +137,7 @@ func main() {
 		logger:        logger,
 		mailer:        mailer,
 		authenticator: auth,
+		rateLimiter:   rateLimiter,
 	}
 
 	mux := app.mount()
