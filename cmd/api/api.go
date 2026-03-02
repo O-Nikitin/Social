@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"expvar"
 	"fmt"
 	"net/http"
 	"os"
@@ -98,8 +99,9 @@ type application struct {
 func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
 
-	// Basic CORS
-	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	//Basic CORS
+	//for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	//This is works only from browser! So we still need rate limiter to prottect server from attacks
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
@@ -127,8 +129,10 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Timeout(20 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
+		//Operations
 		//r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
-		r.Get("/health", app.healthCheckHandler)
+		r.Get("/health", app.healthCheckHandler) //TODO auth disabled for testing
+		r.With(app.BasicAuthMiddleware()).Get("/debug/vars", expvar.Handler().ServeHTTP)
 
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))
