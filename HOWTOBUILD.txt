@@ -29,8 +29,10 @@ How to run:
         http://localhost:3000/v1/swagger/index.html
     front end:
         npm run dev
-    Redis(can be runed with docker compose):
+    Redis(can be runed with docker compose also):
         docker run -d --rm --name social-redis -p 6379:6379 redis:alpine redis-server --loglevel warning
+    Load testing:
+        npx autocannon http://localhost:3000/v1/users/137 --connections 10  --duration 5 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJTb2NpYWwiLCJleHAiOjE3NzIxODYxNDYsImlhdCI6MTc3MTkyNjk0NiwiaXNzIjoiU29jaWFsIiwibmJmIjoxNzcxOTI2OTQ2LCJzdWIiOjEzN30.vVqC62vCglovhhgM9T0cAtTXj3YU99VJrH2NDFYjRYw"
 		 
 DB operaions(Makefile commands)
 	make migration fileName

@@ -14,33 +14,45 @@ var (
 	ErrDuplicateUsername = errors.New("username already exists")
 )
 
+//go:generate mockgen -source=./storage.go -destination=../../cmd/api/mock/store/Mock_Storage.go -package=mock_storage Posts,Users,Comments,Followers,Roles
+
+type Posts interface {
+	Create(context.Context, *Post) error
+	GetByID(context.Context, int64) (*Post, error)
+	DeleteByID(context.Context, int64) error
+	UpdateByID(context.Context, *Post) error
+	GetUserFeed(context.Context, int64, PaginatedFeedQuery) ([]PostWithMetadata, error)
+}
+
+type Users interface {
+	Create(context.Context, *sql.Tx, *User) error
+	GetByID(context.Context, int64) (*User, error)
+	GetByEmail(context.Context, string) (*User, error)
+	CreateAndInvite(context.Context, *User, string, time.Duration) error
+	Activate(context.Context, string) error
+	Delete(context.Context, int64) error
+}
+
+type Comments interface {
+	Create(context.Context, *Comment) error
+	GetByPostID(context.Context, int64) ([]Comment, error)
+}
+
+type Followers interface {
+	Follow(context.Context, int64, int64) error
+	Unfollow(context.Context, int64, int64) error
+}
+
+type Roles interface {
+	GetByName(context.Context, string) (*Role, error)
+}
+
 type Storage struct {
-	Posts interface {
-		Create(context.Context, *Post) error
-		GetByID(context.Context, int64) (*Post, error)
-		DeleteByID(context.Context, int64) error
-		UpdateByID(context.Context, *Post) error
-		GetUserFeed(context.Context, int64, PaginatedFeedQuery) ([]PostWithMetadata, error)
-	}
-	Users interface {
-		Create(context.Context, *sql.Tx, *User) error
-		GetByID(context.Context, int64) (*User, error)
-		GetByEmail(context.Context, string) (*User, error)
-		CreateAndInvite(context.Context, *User, string, time.Duration) error
-		Activate(context.Context, string) error
-		Delete(context.Context, int64) error
-	}
-	Comments interface {
-		Create(context.Context, *Comment) error
-		GetByPostID(context.Context, int64) ([]Comment, error)
-	}
-	Followers interface {
-		Follow(context.Context, int64, int64) error
-		Unfollow(context.Context, int64, int64) error
-	}
-	Roles interface {
-		GetByName(context.Context, string) (*Role, error)
-	}
+	Posts     Posts
+	Users     Users
+	Comments  Comments
+	Followers Followers
+	Roles     Roles
 }
 
 func NewStorage(db *sql.DB) Storage {

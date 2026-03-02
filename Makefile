@@ -3,7 +3,7 @@ MIGRATIONS_PATH = ./cmd/migrate/migrations
 
 .PHONY: test
 test:
-	@go test -v ./...
+	@go1.25 test -v ./...
 
 .PHONY: migrate-create
 migration:
@@ -24,3 +24,9 @@ seed:
 .PHONY: gen-docs
 gen-docs:
 	@swag init -g ./api/main.go -d cmd,internal && swag fmt
+
+.PHONY: gen-mocks
+gen-mocks:
+	@go generate internal/auth/*.go
+	@go generate internal/mailer/*.go
+	@go generate internal/store/cache/*.go
