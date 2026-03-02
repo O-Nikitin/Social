@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/O-Nikitin/Social/docs" //Requaired to generate swagger docs
@@ -181,6 +186,31 @@ func (app *application) run(mux http.Handler) error {
 		ReadTimeout:  time.Second * serverReadTimeout,
 		IdleTimeout:  time.Minute,
 	}
+
+	shutdown := make(chan error)
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		s := <-quit
+
+		//Wait for some time to let active requests finist their work. New requests are not accepted
+		ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+		defer cancel()
+		app.logger.Info("Signal caught", "signal:", s.String())
+		//If time passed and active requests not finished we will have an error here
+		shutdown <- srv.Shutdown(ctx)
+	}()
+
 	app.logger.Infow("Server has started", "addr", app.config.addr)
-	return srv.ListenAndServe()
+
+	err := srv.ListenAndServe()
+	if !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	err = <-shutdown
+	if err != nil {
+		return err
+	}
+	app.logger.Infow("Server has stopped", "addr", app.config.addr, "env", app.config.env)
+	return nil
 }
