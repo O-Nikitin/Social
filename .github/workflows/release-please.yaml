@@ -1,3 +1,5 @@
+#NOTE - to make it works we should have commits according to this template https://www.conventionalcommits.org/en/v1.0.0/
+#As a result file with release notes will be generated
 on:
   push:
     branches:
