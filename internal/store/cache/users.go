@@ -19,7 +19,7 @@ type UserStore struct {
 
 func (u *UserStore) Get(ctx context.Context, userID int64) (*store.User, error) {
 	if u.rdb == nil {
-		return nil, errors.New("Redis cache disabled in config")
+		return nil, errors.New("redis cache disabled in config")
 	}
 	cacheKey := fmt.Sprintf("user-%d", userID)
 	data, err := u.rdb.Get(ctx, cacheKey).Result()
@@ -40,7 +40,7 @@ func (u *UserStore) Get(ctx context.Context, userID int64) (*store.User, error) 
 }
 func (u *UserStore) Set(ctx context.Context, user *store.User) error {
 	if u.rdb == nil {
-		return errors.New("Redis cache disabled in config")
+		return errors.New("redis cache disabled in config")
 	}
 	cacheKey := fmt.Sprintf("user-%d", user.ID)
 
