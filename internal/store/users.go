@@ -74,7 +74,7 @@ func (u *UserStore) Create(ctx context.Context, tx *sql.Tx,
 	}
 	const query = `
 		   INSERT INTO users (username, password, email, role_id)
-		   VALUES ($1, $2, $3, (SELECT if FROM roles WHERE name = $4)) RETURNING id, created_at 
+		   VALUES ($1, $2, $3, (SELECT id FROM roles WHERE name = $4)) RETURNING id, created_at 
 		   `
 
 	roleName := user.Role.Name
