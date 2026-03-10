@@ -71,7 +71,7 @@ func main() {
 			address: env.GetString("REDIS_ADDR", "localhost:6379"),
 			pw:      env.GetString("REDIS_PW", ""),
 			db:      env.GetInt("REDIS_DB", 0),
-			enabled: env.GetBool("REDIS_ENABLED", true)},
+			enabled: env.GetBool("REDIS_ENABLED", false)},
 		rateLimiter: ratelimiter.Config{
 			RequestsPerTimeFrame: env.GetInt("RATE_LIMITER_REQUESTS_COUNT", 20),
 			TimeFrame:            time.Second * 5,
