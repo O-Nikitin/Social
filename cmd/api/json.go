@@ -28,7 +28,7 @@ func writeJSON(w http.ResponseWriter, status int, data any) error {
 }
 
 func readJSON(w http.ResponseWriter, r *http.Request, data any) error {
-	//TODO Set max size of incomming data to prevent attacs
+	// Set max size of incomming data to prevent attacs
 	maxBytes := 1_048_578 //1MB
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 

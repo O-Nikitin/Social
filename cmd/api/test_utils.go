@@ -7,8 +7,8 @@ import (
 
 	mock_auth "github.com/O-Nikitin/Social/cmd/api/mock/auth"
 	mock_mailer "github.com/O-Nikitin/Social/cmd/api/mock/mailer"
+	mock_limiter "github.com/O-Nikitin/Social/cmd/api/mock/ratelimiter"
 	mock_storage "github.com/O-Nikitin/Social/cmd/api/mock/store"
-	"github.com/O-Nikitin/Social/internal/ratelimiter"
 	"github.com/O-Nikitin/Social/internal/store"
 	"github.com/O-Nikitin/Social/internal/store/cache"
 	"github.com/golang/mock/gomock"
@@ -24,6 +24,7 @@ type AppMocks struct {
 	Cache     *mock_storage.MockUserCache
 	Mailer    *mock_mailer.MockClient
 	Auth      *mock_auth.MockAuthenticator
+	Limiter   *mock_limiter.MockLimiter
 }
 
 func newTestApp(t *testing.T, cfg config) (*application, *AppMocks) {
@@ -45,6 +46,8 @@ func newTestApp(t *testing.T, cfg config) (*application, *AppMocks) {
 
 	mockAuth := mock_auth.NewMockAuthenticator(ctrl)
 
+	mockLimiter := mock_limiter.NewMockLimiter(ctrl)
+
 	storage := store.Storage{
 		Posts:     mockPosts,
 		Users:     mockUsers,
@@ -57,12 +60,6 @@ func newTestApp(t *testing.T, cfg config) (*application, *AppMocks) {
 		Users: mockUserCache,
 	}
 
-	// Rate limiter
-	rateLimiter := ratelimiter.NewFixedWindowLimiter(
-		cfg.rateLimiter.RequestsPerTimeFrame,
-		cfg.rateLimiter.TimeFrame,
-	)
-
 	a := &application{
 		logger:        log,
 		store:         storage,
@@ -70,7 +67,7 @@ func newTestApp(t *testing.T, cfg config) (*application, *AppMocks) {
 		mailer:        mockMailer,
 		authenticator: mockAuth,
 		config:        cfg,
-		rateLimiter:   rateLimiter, //TODO real rate limiter should be replaced with mock
+		rateLimiter:   mockLimiter,
 	}
 	m := &AppMocks{
 		Posts:     mockPosts,
@@ -81,6 +78,7 @@ func newTestApp(t *testing.T, cfg config) (*application, *AppMocks) {
 		Cache:     mockUserCache,
 		Mailer:    mockMailer,
 		Auth:      mockAuth,
+		Limiter:   mockLimiter,
 	}
 
 	return a, m
