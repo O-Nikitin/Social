@@ -32,7 +32,6 @@ type User struct {
 }
 
 type password struct {
-	text *string //TODO do we need to store pass in memory?
 	hash []byte
 }
 
@@ -42,21 +41,9 @@ func (p *password) Set(text string) error {
 	if err != nil {
 		return err
 	}
-	p.text = &text
 	p.hash = hash
 
 	return nil
-}
-
-func (p *password) Matches(text string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword(p.hash, []byte(text))
-	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
 }
 
 func (p *password) Compare(text string) error {

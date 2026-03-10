@@ -120,7 +120,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 	app.logger.Infow("Email sent", "status code", code)
 
-	//TODO for testing. Later user should get token on email
+	//TODO for testing. Later user should get token on email. To enable email sending ENV should be "production"
 	userWithToken := UserWithToken{
 		User:  user,
 		Token: plainToken,

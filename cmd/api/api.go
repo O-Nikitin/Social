@@ -120,7 +120,7 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Logger)
 	//Recovers from panic and return internal server error
 	r.Use(middleware.Recoverer)
-	//Rate limiter
+	//Rate limiter prevents DDOs attacs
 	r.Use(app.RateLimiterMiddleware)
 
 	// Set a timeout value on the request context (ctx), that will signal

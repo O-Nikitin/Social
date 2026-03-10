@@ -60,7 +60,7 @@ func (f *FollowersStore) Unfollow(ctx context.Context, followerID int64, current
 	}
 	//TODO Maybe it is not needed if client interface designed well
 	// and it is not possible to click unfollow on user that current
-	// is not following at the moment
+	// is not following at the moment. Can be changed when UI ready
 	if rows == 0 {
 		return ErrNotFound // or ErrConflict depending on semantics
 	}
